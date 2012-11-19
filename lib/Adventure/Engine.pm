@@ -859,80 +859,78 @@ class Adventure::Engine {
         return @events;
     }
 
-    # RAKUDO: private multimethods NYI
-    method !apply(Event $_) {
-        push @!events, $_;
-        when Adventure::TwoRoomsConnected {
-            my ($room1, $room2) = .rooms.list;
-            my $direction = .direction;
+    method !apply(Event $event) {
+        push @!events, $event;
+        ap($event);
+
+        multi ap(Adventure::TwoRoomsConnected (:$rooms [$room1, $room2], :$direction)) {
             %!exits{$room1}{$direction} = $room2;
             %!exits{$room2}{opposite $direction} = $room1;
         }
-        when Adventure::TwoRoomsDisconnected {
-            my ($room1, $room2) = .rooms.list;
-            my $direction = .direction;
+        multi ap(Adventure::TwoRoomsDisconnected (:$rooms [$room1, $room2], :$direction)) {
             %!exits{$room1}.delete($direction);
             %!exits{$room2}.delete(opposite $direction);
         }
-        when Adventure::PlayerWalked {
+        multi ap(Adventure::PlayerWalked $_) {
             $!player_location = .to;
         }
-        when Adventure::PlayerWasPlaced {
+        multi ap(Adventure::PlayerWasPlaced $_) {
             $!player_location = .in;
         }
-        when Adventure::DirectionAliased {
+        multi ap(Adventure::DirectionAliased $_) {
             %!exit_aliases{.room}{.alias} = .direction;
         }
-        when Adventure::ThingPlaced {
+        multi ap(Adventure::ThingPlaced $_) {
             %!thing_rooms{.thing} = .room;
         }
-        when Adventure::PlayerOpened {
+        multi ap(Adventure::PlayerOpened $_) {
             %!open_things{.thing} = True;
         }
-        when Adventure::ThingMadeAContainer {
+        multi ap(Adventure::ThingMadeAContainer $_) {
             %!containers{.thing} = True;
         }
-        when Adventure::ThingMadeAPlatform {
+        multi ap(Adventure::ThingMadeAPlatform $_) {
             %!platforms{.thing} = True;
         }
-        when Adventure::ThingMadeReadable {
+        multi ap(Adventure::ThingMadeReadable $_) {
             %!readable_things{.thing} = True;
         }
-        when Adventure::ThingHidden {
+        multi ap(Adventure::ThingHidden $_) {
             %!hidden_things{.thing} = True;
         }
-        when Adventure::ThingUnhidden {
+        multi ap(Adventure::ThingUnhidden $_) {
             %!hidden_things{.thing} = False;
         }
-        when Adventure::ThingMadeCarryable {
+        multi ap(Adventure::ThingMadeCarryable $_) {
             %!carryable_things{.thing} = True;
         }
-        when Adventure::PlayerTook {
+        multi ap(Adventure::PlayerTook $_) {
             %!thing_rooms{.thing} = 'player inventory';
         }
-        when Adventure::PlayerDropped {
+        multi ap(Adventure::PlayerDropped $_) {
             %!thing_rooms{.thing} = $!player_location;
         }
-        when Adventure::ThingMadeImplicit {
+        multi ap(Adventure::ThingMadeImplicit $_) {
             %!implicit_things{.thing} = True;
         }
-        when Adventure::RoomMadeDark {
+        multi ap(Adventure::RoomMadeDark $_) {
             %!dark_rooms{.room} = True;
         }
-        when Adventure::ThingMadeALightSource {
+        multi ap(Adventure::ThingMadeALightSource $_) {
             %!light_sources{.thing} = True;
         }
-        when Adventure::LightSourceSwitchedOn {
+        multi ap(Adventure::LightSourceSwitchedOn $_) {
             %!things_shining{.thing} = True;
         }
-        when Adventure::PlayerPutIn {
+        multi ap(Adventure::PlayerPutIn $_) {
             %!thing_rooms{.thing} = "contents:{.in}";
         }
-        when Adventure::PlayerPutOn {
+        multi ap(Adventure::PlayerPutOn $_) {
             %!thing_rooms{.thing} = "contents:{.on}";
         }
-        when Adventure::GameFinished {
+        multi ap(Adventure::GameFinished $_) {
             $!game_finished = True;
         }
+        multi ap(Event) {} # catch-all; no-op
     }
 }
