@@ -823,7 +823,7 @@ class Adventure::Engine {
     }
 
     method put_out_fuse($name) {
-        %!tick_hooks.delete($name);
+        %!tick_hooks{$name}:delete;
     }
 
     my class Save {
@@ -868,8 +868,8 @@ class Adventure::Engine {
             %!exits{$room2}{opposite $direction} = $room1;
         }
         multi ap(Adventure::TwoRoomsDisconnected (:$rooms [$room1, $room2], :$direction)) {
-            %!exits{$room1}.delete($direction);
-            %!exits{$room2}.delete(opposite $direction);
+            %!exits{$room1}{$direction}:delete;
+            %!exits{$room2}{opposite $direction}:delete;
         }
         multi ap(Adventure::PlayerWalked $_) {
             $!player_location = .to;
