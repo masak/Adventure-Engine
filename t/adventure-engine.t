@@ -585,7 +585,7 @@ sub throws_exception(&code, $ex_type, $message, &followup = {;}) {
     my @rooms = <kitchen veranda>;
     $engine.connect(@rooms, my $direction = 'south');
     $engine.place_player('kitchen');
-    $engine.light_fuse(3, 'end_game', { $engine.finish });
+    $engine.light_fuse(3, 'end_game', { |$engine.finish });
     $engine.walk('south');
     $engine.walk('north');
     is $engine.walk('south'),
