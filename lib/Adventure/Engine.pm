@@ -308,7 +308,7 @@ class Adventure::Engine {
     }
 
     method !contents_of($thing) {
-        return %!thing_rooms.grep({.value eq "contents:$thing"})>>.key;
+        return %!thing_rooms.grep({.value eq "contents:$thing"})>>.key.sort;
     }
 
     method !explicit_things_at($location) {
@@ -319,7 +319,7 @@ class Adventure::Engine {
         }
 
         return unless $location;
-        return gather for %!thing_rooms.keys -> $thing {
+        return gather for %!thing_rooms.keys.sort -> $thing {
             next unless here_visible_and_explicit($thing);
             if (!%!openable_things{$thing} || %!open_things{$thing})
                 && self!contents_of($thing) {
