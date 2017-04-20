@@ -367,7 +367,7 @@ class Adventure::Engine {
         my @events;
         for %!tick_hooks.kv -> $name, %props {
             if --%props<ticks> == 0 {
-                @events.push(%props<hook>());
+                @events.append(flat %props<hook>());
             }
         }
         return @events;
@@ -409,7 +409,7 @@ class Adventure::Engine {
         my @events;
         my $walk = True;
         if %!try_exit_hooks{$!player_location}{$actual_direction} -> &hook {
-            @events.push(&hook());
+            @events.append(flat &hook());
             $walk = @events.pop;
         }
 
@@ -430,7 +430,7 @@ class Adventure::Engine {
                     ));
                 }
             }
-            @events.push(self!tick);
+            @events.append(self!tick);
         }
         self!apply_and_return: @events;
     }
@@ -503,8 +503,9 @@ class Adventure::Engine {
         my @events = Adventure::PlayerExamined.new(
             :$thing
         );
+
         if %!examine_hooks{$thing} -> &hook {
-            @events.push(&hook());
+            @events.append(flat &hook());
         }
 
         self!apply_and_return: @events;
@@ -522,7 +523,7 @@ class Adventure::Engine {
             :things(self!explicit_things_at('player inventory'))
         );
         if %!examine_hooks{$thing} -> &hook {
-            @events.push(&hook());
+            @events.append(flat &hook());
         }
 
         self!apply_and_return: @events;
@@ -561,9 +562,9 @@ class Adventure::Engine {
             );
         }
         if %!open_hooks{$thing} -> &hook {
-            @events.push(&hook());
+            @events.append(&hook());
         }
-        @events.push(self!tick);
+        @events.append(self!tick);
         self!apply_and_return: @events;
     }
 
@@ -607,9 +608,9 @@ class Adventure::Engine {
         }
         @events.push(Adventure::PlayerPutIn.new(:$thing, :$in));
         if %!put_hooks{$in} -> &hook {
-            @events.push($_) when Event for &hook($thing);
+            @events.push($_) when Event for flat &hook($thing);
         }
-        @events.push(self!tick);
+        @events.append(self!tick);
 
         self!apply_and_return: @events;
     }
@@ -649,9 +650,9 @@ class Adventure::Engine {
 
         my @events = Adventure::PlayerPutOn.new(:$thing, :$on);
         if %!put_hooks{$on} -> &hook {
-            @events.push($_) when Event for &hook($thing);
+            @events.push($_) when Event for flat &hook($thing);
         }
-        @events.push(self!tick);
+        @events.append(self!tick);
         self!apply_and_return: @events;
     }
 
@@ -676,7 +677,7 @@ class Adventure::Engine {
         die X::Adventure::ThingNotReadable.new(:$thing)
             unless %!readable_things{$thing};
 
-        Adventure::PlayerRead.new(:$thing), self!tick;
+        Adventure::PlayerRead.new(:$thing), |self!tick;
     }
 
     method hide_thing($thing) {
@@ -722,17 +723,17 @@ class Adventure::Engine {
         my @events;
         for %!remove_from_hooks.kv -> $container, &hook {
             if self.thing_is_in($thing, "contents:$container") {
-                @events.push($_) when Event for &hook($thing);
+                @events.push($_) when Event for flat &hook($thing);
             }
         }
         # XXX: Need to apply this event early so that hooks can drop the thing.
         self!apply(Adventure::PlayerTook.new(:$thing));
         if %!take_hooks{$thing} -> &hook {
-            @events.push($_) when Event for &hook();
+            @events.push($_) when Event for flat &hook();
         }
-        @events.push(self!tick);
+        @events.append(self!tick);
         self!apply($_) for @events;
-        return Adventure::PlayerTook.new(:$thing), @events;
+        return Adventure::PlayerTook.new(:$thing), |@events;
     }
 
     method drop($thing) {
@@ -749,7 +750,7 @@ class Adventure::Engine {
             if %!hidden_things{$thing};
 
         my @events = Adventure::PlayerDropped.new(:$thing);
-        @events.push(self!tick);
+        @events.append(self!tick);
         self!apply_and_return: @events;
     }
 
@@ -785,7 +786,7 @@ class Adventure::Engine {
         if %!light_sources{$thing} {
             @events.push(Adventure::LightSourceSwitchedOn.new(:$thing));
         }
-        @events.push(self!tick);
+        @events.append(self!tick);
         self!apply_and_return: @events;
     }
 
