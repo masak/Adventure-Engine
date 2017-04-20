@@ -1,6 +1,6 @@
 {
     "name" : "Adventure::Engine",
-    "version" : "0.3.0",
+    "version" : "0.4.0",
     "description" : "Helps build and run adventure games.",
     "author" : "Carl Mäsak",
     "depends" : [],
