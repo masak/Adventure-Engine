@@ -4,5 +4,8 @@
     "description" : "Helps build and run adventure games.",
     "author" : "Carl Mäsak",
     "depends" : [],
+    "provides" : {
+        "Adventure::Engine": "lib/Adventure/Engine.pm"
+    },
     "source-url" : "git://github.com/masak/Adventure-Engine.git"
 }
