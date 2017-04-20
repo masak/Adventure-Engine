@@ -858,7 +858,7 @@ class Adventure::Engine {
             'up'        => 'down',
         ;
 
-        %opposites.push( %opposites.invert );
+        %opposites.push( %opposites.invert.eager );
 
         %opposites{$direction};
     }
